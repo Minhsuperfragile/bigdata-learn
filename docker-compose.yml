@@ -1,0 +1,78 @@
+version: "3"
+services:
+  namenode:
+    image: apache/hadoop:3.3.6
+    hostname: namenode
+    container_name: hadoop-namenode
+    command: [ "hdfs", "namenode" ]
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    env_file:
+      - ./config
+    environment:
+      ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
+    volumes:
+      - .:/workspace
+
+  datanode:
+    image: apache/hadoop:3.3.6
+    container_name: hadoop-datanode
+    command: [ "hdfs", "datanode" ]
+    ports:
+      - "9864:9864" # Web UI của DataNode
+      - "9866:9866" # Cổng truyền dữ liệu Block
+    env_file:
+      - ./config
+
+  resourcemanager:
+    image: apache/hadoop:3.3.6
+    hostname: resourcemanager
+    container_name: hadoop-resourcemanager
+    command: [ "yarn", "resourcemanager" ]
+    ports:
+      - "8088:8088"
+    env_file:
+      - ./config
+    volumes:
+      - .:/workspace
+
+  nodemanager:
+    image: apache/hadoop:3.3.6
+    container_name: hadoop-nodemanager
+    command: [ "yarn", "nodemanager" ]
+    env_file:
+      - ./config
+
+  # --- THÊM SPARK TRÊN MÁY BẠN (1 Master + 1 Worker) ---
+  spark-master:
+    image: bitnamilegacy/spark:3.5.3
+    container_name: spark-master
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    ports:
+      - "7077:7077" # Cổng kết nối Master
+      - "8080:8080" # Web UI Master
+      - "7079:7079" # <-- Cổng Driver nhận kết quả
+      - "7080:7080" # <-- Cổng trao đổi dữ liệu Shuffle (BlockManager)
+    volumes:
+      - .:/workspace
+  spark-worker-1:
+    image: bitnamilegacy/spark:3.5.3
+    container_name: spark-worker-1
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://10.50.66.238:7077
+      - SPARK_WORKER_WEBUI_PORT=8081
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    ports:
+      - "8081:8081"
+    depends_on:
+      - spark-master

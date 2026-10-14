@@ -1,0 +1,32 @@
+version: "3"
+services:
+  datanode:
+    image: apache/hadoop:3.3.6
+    container_name: hadoop-datanode
+    command: [ "hdfs", "datanode" ]
+    ports:
+      - "9864:9864"
+      - "9866:9866"
+    env_file:
+      - ./config-slave
+
+  nodemanager:
+    image: apache/hadoop:3.3.6
+    container_name: hadoop-nodemanager
+    command: [ "yarn", "nodemanager" ]
+    env_file:
+      - ./config-slave
+  # Spark Worker kết nối về Master của bạn
+  spark-worker:
+    image: bitnami/spark:3.5.3
+    container_name: spark-worker
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://10.50.66.238:7077
+      - SPARK_WORKER_WEBUI_PORT=8081
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    ports:
+      - "8081:8081"

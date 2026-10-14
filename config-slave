@@ -1,0 +1,9 @@
+HADOOP_HOME=/opt/hadoop
+CORE-SITE.XML_fs.defaultFS=hdfs://10.50.66.238:9000
+HDFS-SITE.XML_dfs.replication=2
+HDFS-SITE.XML_dfs.permissions=false
+MAPRED-SITE.XML_mapreduce.framework.name=yarn
+YARN-SITE.XML_yarn.resourcemanager.hostname=10.50.66.238
+YARN-SITE.XML_yarn.nodemanager.aux-services=mapreduce_shuffle
+YARN-SITE.XML_yarn.nodemanager.pmem-check-enabled=false
+YARN-SITE.XML_yarn.nodemanager.vmem-check-enabled=false
